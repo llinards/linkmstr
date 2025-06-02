@@ -31,10 +31,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('links.create');
 
     Route::get('links/{link}/edit', function (\App\Models\Link $link) {
+        if (auth()->id() !== $link->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
         return view('links.edit', ['link' => $link]);
     })->name('links.edit');
 
     Route::get('links/{link}/stats', function (\App\Models\Link $link) {
+        if (auth()->id() !== $link->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
         return view('links.stats', ['link' => $link]);
     })->name('links.stats');
 });
