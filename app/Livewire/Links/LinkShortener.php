@@ -4,9 +4,10 @@ namespace App\Livewire\Links;
 
 use App\Models\Link;
 use App\Services\LinkService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Livewire\Component;
 use Livewire\Attributes\Rule;
+use Livewire\Component;
 
 class LinkShortener extends Component
 {
@@ -39,10 +40,10 @@ class LinkShortener extends Component
         try {
             $this->createdLink = $linkService->createLink([
                 'original_url' => $this->originalUrl,
-                'title' => $this->title,
-                'description' => $this->description,
-                'expires_at' => $this->expiresAt,
-                'custom_code' => $this->customCode,
+                'title'        => $this->title,
+                'description'  => $this->description,
+                'expires_at'   => $this->expiresAt,
+                'custom_code'  => $this->customCode,
             ]);
 
             $this->showForm = false;
@@ -50,6 +51,7 @@ class LinkShortener extends Component
         } catch (ValidationException $e) {
             $this->addError('customCode', 'This short code is already taken. Please try another.');
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             $this->addError('originalUrl', 'An error occurred while creating your link. Please try again.');
         }
     }
@@ -68,8 +70,8 @@ class LinkShortener extends Component
      */
     public function createAnother()
     {
-        $this->createdLink = null;
-        $this->showForm = true;
+        $this->createdLink       = null;
+        $this->showForm          = true;
         $this->showCopiedMessage = false;
     }
 

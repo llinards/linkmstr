@@ -4,6 +4,7 @@ namespace App\Livewire\Links;
 
 use App\Models\Link;
 use App\Services\LinkService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -66,6 +67,7 @@ class LinkEditor extends Component
         } catch (ValidationException $e) {
             $this->addError('customCode', 'This short code is already taken. Please try another.');
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             $this->addError('originalUrl', 'An error occurred while updating your link. Please try again.');
         }
     }
