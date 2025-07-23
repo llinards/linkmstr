@@ -16,6 +16,18 @@
         </div>
     </div>
 
+    @if (session('message'))
+        <x-success-alert class="mb-6">
+            {{ session('message') }}
+        </x-success-alert>
+    @endif
+
+    @if (session('error'))
+        <x-error-alert class="mb-6">
+            {{ session('error') }}
+        </x-error-alert>
+    @endif
+
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-zinc-700 dark:text-gray-400">
@@ -63,7 +75,7 @@
                             <svg class="w-3 h-3 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                  fill="currentColor" viewBox="0 0 24 24">
                                 <path
-                                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+                                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5. пропорц5a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
                             </svg>
                         @endif
                     </div>
@@ -83,10 +95,10 @@
                         </div>
                     </th>
                     <td class="px-6 py-4">
-                        <div class="flex items-center space-x-2">
-                            <span>{{ $link->short_url }}</span>
+                        <div class="flex items-center">
+                            <span class="pr-2">{{ $link->short_url }}</span>
                             <button wire:click="copyToClipboard({{ $link->id }})"
-                                    class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                                    class="text-gray-700 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
                                      fill="currentColor">
                                     <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/>
@@ -103,25 +115,50 @@
                         {{ $link->created_at->diffForHumans() }}
                     </td>
                     <td class="px-6 py-4">
-                        <flux:field variant="inline">
-                            <flux:label>
-                                <span class="text-xs {{ $link->is_active ? 'text-green-500' : 'text-red-500' }}">
-                                    {{ $link->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </flux:label>
+                        <div class="flex flex-col items-start space-y-2">
+                            <span
+                                class="text-xs font-medium {{ $link->is_active ? 'text-green-500' : 'text-red-500' }}">
+                                {{ $link->is_active ? 'Active' : 'Inactive' }}
+                            </span>
                             <flux:switch :checked="$link->is_active"
                                          wire:click="toggleActive({{ $link->id }})"/>
-                            <flux:error name="links.{{ $link->id }}.is_active"/>
-                        </flux:field>
+                        </div>
+                        <flux:error name="links.{{ $link->id }}.is_active"/>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="flex space-x-2">
-                            <a href="{{ route('links.edit', $link) }}"
-                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                            <a href="{{ route('links.stats', $link) }}"
-                               class="font-medium text-green-600 dark:text-green-500 hover:underline">Stats</a>
-                            <button wire:click="confirmDelete({{ $link->id }})"
-                                    class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete
+                        <div class="flex items-center space-x-2">
+                            <!-- Edit Icon -->
+                            <a href="{{ route('links.edit', $link) }}" wire:navigate
+                               class="text-gray-700 hover:text-blue-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                               title="Edit">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path
+                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                </svg>
+                            </a>
+
+                            <!-- Stats Icon -->
+                            <a href="{{ route('links.stats', $link) }}" wire:navigate
+                               class="text-gray-700 hover:text-blue-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                               title="Statistics">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path
+                                        d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                                </svg>
+                            </a>
+
+                            <!-- Delete Icon -->
+                            <button wire:confirm="Are you sure?" wire:click="deleteLink({{ $link->id }})" wire:navigate
+                                    class="text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                                    title="Delete">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                          clip-rule="evenodd"/>
+                                </svg>
                             </button>
                         </div>
                     </td>
@@ -138,10 +175,17 @@
                             </svg>
                             <p class="text-xl font-medium">No links found</p>
                             <p class="mt-1">Get started by creating your first shortened link</p>
-                            <a href="{{ route('links.create') }}"
-                               class="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800">
-                                Create Link
-                            </a>
+                            <flux:button class="mt-4" href="{{route('links.create')}}" wire:navigate variant="primary">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Create Link</span>
+                                </div>
+                            </flux:button>
                         </div>
                     </td>
                 </tr>
@@ -149,61 +193,23 @@
             </tbody>
         </table>
     </div>
-
     <div class="mt-4">
         {{ $links->links() }}
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    @if ($showDeleteModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:bg-zinc-800">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 dark:bg-zinc-800">
-                        <div class="sm:flex sm:items-start">
-                            <div
-                                class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-900">
-                                <svg class="h-6 w-6 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
-                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white"
-                                    id="modal-title">Delete Link</h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete
-                                        this link? All data associated with this link will be permanently removed. This
-                                        action cannot be undone.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse dark:bg-zinc-700">
-                        <button wire:click="deleteLink" type="button"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Delete
-                        </button>
-                        <button wire:click="cancelDelete" type="button"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-zinc-800 dark:text-white dark:border-zinc-600 dark:hover:bg-zinc-700">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-        @this.on('copy-to-clipboard', (event) => {
-            navigator.clipboard.writeText(event.url);
-        })
-            ;
-        });
-    </script>
 </div>
+@script
+<script>
+    document.addEventListener('livewire:initialized', () => {
+    @this.on('copy-to-clipboard', handleClipboardCopy)
+        ;
+    });
+
+    async function handleClipboardCopy(event) {
+        try {
+            await navigator.clipboard.writeText(event.url);
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+        }
+    }
+</script>
+@endscript

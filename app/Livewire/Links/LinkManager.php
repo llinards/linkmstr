@@ -5,6 +5,8 @@ namespace App\Livewire\Links;
 use App\Models\Link;
 use App\Services\LinkService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,13 +15,12 @@ class LinkManager extends Component
     use WithPagination;
 
     public ?string $search = null;
-    public ?string $sortField = 'created_at';
-    public string $sortDirection = 'desc';
-    public bool $showDeleteModal = false;
-    public ?Link $linkToDelete = null;
-    public bool $showCopiedMessage = false;
 
-    protected $queryString = [
+    public ?string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
+    protected array $queryString = [
         'search' => ['except' => ''],
         'sortField' => ['except' => 'created_at'],
         'sortDirection' => ['except' => 'desc'],
@@ -28,7 +29,7 @@ class LinkManager extends Component
     /**
      * Sort links by the given field.
      */
-    public function sortBy(string $field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -41,63 +42,48 @@ class LinkManager extends Component
     /**
      * Toggle link active status.
      */
-    public function toggleActive(Link $link)
+    public function toggleActive(Link $link): void
     {
-        $link->is_active = !$link->is_active;
+        $link->is_active = ! $link->is_active;
         $link->save();
     }
 
     /**
      * Copy the short URL to clipboard.
      */
-    public function copyToClipboard(Link $link)
+    public function copyToClipboard(Link $link): void
     {
         $this->dispatch('copy-to-clipboard', url: $link->short_url);
-        $this->showCopiedMessage = true;
-    }
-
-    /**
-     * Confirm link deletion.
-     */
-    public function confirmDelete(Link $link)
-    {
-        $this->linkToDelete = $link;
-        $this->showDeleteModal = true;
+        session()->flash('message', 'Link has been saved in clipboard.');
     }
 
     /**
      * Delete the link.
      */
-    public function deleteLink(LinkService $linkService)
+    public function deleteLink(Link $link, LinkService $linkService): void
     {
-        if ($this->linkToDelete) {
-            $linkService->deleteLink($this->linkToDelete);
-            $this->showDeleteModal = false;
-            $this->linkToDelete = null;
+        try {
+            $linkService->deleteLink($link);
+            $this->dispatch('link-deleted');
+            session()->flash('message', 'Link deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            session()->flash('error', 'An error occurred while deleting the link. Please try again.');
         }
-    }
-
-    /**
-     * Cancel link deletion.
-     */
-    public function cancelDelete()
-    {
-        $this->showDeleteModal = false;
-        $this->linkToDelete = null;
     }
 
     /**
      * Render the component.
      */
-    public function render()
+    public function render(): View
     {
         $links = Link::where('user_id', Auth::id())
             ->when($this->search, function ($query) {
                 $query->where(function ($query) {
-                    $query->where('original_url', 'like', '%' . $this->search . '%')
-                        ->orWhere('short_code', 'like', '%' . $this->search . '%')
-                        ->orWhere('title', 'like', '%' . $this->search . '%')
-                        ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $query->where('original_url', 'like', '%'.$this->search.'%')
+                        ->orWhere('short_code', 'like', '%'.$this->search.'%')
+                        ->orWhere('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->orderBy($this->sortField, $this->sortDirection)
