@@ -27,52 +27,33 @@ class LinkShortener extends Component
     public ?string $customCode = null;
 
     public ?Link $createdLink = null;
-    public bool $showForm = true;
-    public bool $showCopiedMessage = false;
 
     /**
      * Create a new short link.
      */
-    public function createLink(LinkService $linkService)
+    public function createLink(LinkService $linkService): void
     {
         $this->validate();
 
         try {
             $this->createdLink = $linkService->createLink([
                 'original_url' => $this->originalUrl,
-                'title'        => $this->title,
-                'description'  => $this->description,
-                'expires_at'   => $this->expiresAt,
-                'custom_code'  => $this->customCode,
+                'title' => $this->title,
+                'description' => $this->description,
+                'expires_at' => $this->expiresAt,
+                'custom_code' => $this->customCode,
             ]);
 
-            $this->showForm = false;
             $this->reset(['originalUrl', 'title', 'description', 'expiresAt', 'customCode']);
+            session()->flash('message', 'Your link has been shortened!');
+            redirect()->route('links.index');
         } catch (ValidationException $e) {
             $this->addError('customCode', 'This short code is already taken. Please try another.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+            session()->flash('error', 'An error occurred while creating your link. Please try again.');
             $this->addError('originalUrl', 'An error occurred while creating your link. Please try again.');
         }
-    }
-
-    /**
-     * Copy the short URL to clipboard.
-     */
-    public function copyToClipboard()
-    {
-        $this->dispatch('copy-to-clipboard', url: $this->createdLink->short_url);
-        $this->showCopiedMessage = true;
-    }
-
-    /**
-     * Reset the form to create another link.
-     */
-    public function createAnother()
-    {
-        $this->createdLink       = null;
-        $this->showForm          = true;
-        $this->showCopiedMessage = false;
     }
 
     /**
