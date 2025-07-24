@@ -23,7 +23,7 @@ class LinkShortener extends Component
     #[Rule('nullable|date|after:now')]
     public ?string $expiresAt = null;
 
-    #[Rule('nullable|string|max:10|alpha_num')]
+    #[Rule('nullable|unique:links,short_code|string|max:10|alpha_num')]
     public ?string $customCode = null;
 
     public ?Link $createdLink = null;
