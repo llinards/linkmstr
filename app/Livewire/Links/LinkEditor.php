@@ -6,6 +6,7 @@ use App\Models\Link;
 use App\Services\LinkService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
@@ -34,32 +35,32 @@ class LinkEditor extends Component
     /**
      * Mount the component.
      */
-    public function mount(Link $link)
+    public function mount(Link $link): void
     {
-        $this->link        = $link;
+        $this->link = $link;
         $this->originalUrl = $link->original_url;
-        $this->title       = $link->title;
+        $this->title = $link->title;
         $this->description = $link->description;
-        $this->expiresAt   = $link->expires_at ? $link->expires_at->format('Y-m-d\TH:i') : null;
-        $this->customCode  = $link->short_code;
-        $this->isActive    = $link->is_active;
+        $this->expiresAt = $link->expires_at ? $link->expires_at->format('Y-m-d\TH:i') : null;
+        $this->customCode = $link->short_code;
+        $this->isActive = $link->is_active;
     }
 
     /**
      * Update the link.
      */
-    public function updateLink(LinkService $linkService)
+    public function updateLink(LinkService $linkService): void
     {
         $this->validate();
 
         try {
             $linkService->updateLink($this->link, [
                 'original_url' => $this->originalUrl,
-                'title'        => $this->title,
-                'description'  => $this->description,
-                'expires_at'   => $this->expiresAt,
-                'custom_code'  => $this->customCode,
-                'is_active'    => $this->isActive,
+                'title' => $this->title,
+                'description' => $this->description,
+                'expires_at' => $this->expiresAt,
+                'custom_code' => $this->customCode,
+                'is_active' => $this->isActive,
             ]);
 
             $this->dispatch('link-updated');
@@ -75,7 +76,7 @@ class LinkEditor extends Component
     /**
      * Render the component.
      */
-    public function render()
+    public function render(): View
     {
         return view('livewire.links.link-editor');
     }

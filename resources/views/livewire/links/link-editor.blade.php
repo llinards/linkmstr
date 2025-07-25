@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto">
+<div class="max-w-3xl h-full mx-auto flex items-center">
     <div class="p-6 bg-white rounded-xl shadow-sm dark:bg-zinc-800">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Edit Link</h2>
@@ -23,25 +23,19 @@
         <x-status-messages/>
 
         <form wire:submit="updateLink" class="flex flex-col gap-6">
-            <!-- URL to shorten -->
             <flux:input
                 wire:model="originalUrl"
                 label="URL to shorten"
                 type="url"
-                required
                 placeholder="https://example.com/very/long/url/to/shorten"
                 description="Enter the long URL you want to shorten"
             />
-
-            <!-- Title -->
             <flux:input
                 wire:model="title"
                 label="Title (optional)"
                 type="text"
                 placeholder="My awesome link"
             />
-
-            <!-- Description -->
             <div>
                 <flux:textarea
                     label="Description (optional)"
@@ -49,37 +43,28 @@
                     rows="3"
                     placeholder="A brief description about this link"
                 />
-                @error('description')
-                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                @enderror
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Expiration Date -->
                 <flux:input
                     wire:model="expiresAt"
                     label="Expiration Date (optional)"
                     type="datetime-local"
                     description="When should this link expire?"
                 />
-
-                <!-- Custom Code -->
                 <div class="space-y-2">
-                    <div class="flex">
-                        <flux:input.group label="Short Code" description="The custom code for your shortened URL">
+                    <flux:field>
+                        <flux:label>Short Code</flux:label>
+                        <flux:description>The custom code for your shortened URL</flux:description>
+                        <flux:input.group>
                             <flux:input.group.prefix>{{ url('/') }}/</flux:input.group.prefix>
                             <flux:input wire:model="customCode"
                                         type="text"
                                         placeholder="abc123"/>
                         </flux:input.group>
-                    </div>
-                    @error('customCode')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                    @enderror
+                        <flux:error name="customCode"/>
+                    </flux:field>
                 </div>
             </div>
-
-            <!-- Status Toggle -->
             <div class="flex flex-col space-y-1">
                 <div class="flex items-center">
                     <flux:field variant="inline">
@@ -92,7 +77,6 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 ms-6">When checked, this link will be accessible to
                     users</p>
             </div>
-
             <div class="flex space-x-4 justify-center mt-2">
                 <flux:button type="submit" variant="primary">
                     <div class="flex items-center">
@@ -105,7 +89,6 @@
                         <span>Update Link</span>
                     </div>
                 </flux:button>
-
                 <flux:button
                     tag="a"
                     href="{{ route('links.index') }}"
