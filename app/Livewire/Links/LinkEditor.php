@@ -33,7 +33,7 @@ class LinkEditor extends Component
     #[Rule('boolean')]
     public bool $isActive = true;
 
-    // UTM parameters
+    // UTM parameters - synced from UTM component
     public bool $enableUtm = false;
 
     public ?string $utmService = null;
@@ -51,6 +51,8 @@ class LinkEditor extends Component
     // Store original URL without UTM parameters for editing
     private ?string $originalUrlWithoutUtm = null;
 
+    protected $listeners = ['utmDataChanged'];
+
     /**
      * Mount the component.
      */
@@ -66,6 +68,20 @@ class LinkEditor extends Component
 
         // Parse existing UTM parameters from the URL
         $this->parseExistingUtmParameters($link->original_url);
+    }
+
+    /**
+     * Handle UTM data changes from the UTM component.
+     */
+    public function utmDataChanged(array $utmData): void
+    {
+        $this->enableUtm = $utmData['enableUtm'];
+        $this->utmService = $utmData['utmService'];
+        $this->utmSource = $utmData['utmSource'];
+        $this->utmMedium = $utmData['utmMedium'];
+        $this->utmCampaign = $utmData['utmCampaign'];
+        $this->utmTerm = $utmData['utmTerm'];
+        $this->utmContent = $utmData['utmContent'];
     }
 
     /**
@@ -96,25 +112,6 @@ class LinkEditor extends Component
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             $this->addError('originalUrl', 'An error occurred while updating your link. Please try again.');
-        }
-    }
-
-    /**
-     * Update UTM fields when a popular service is selected.
-     */
-    public function updatedUtmService(UtmService $utmService): void
-    {
-        if (empty($this->utmService)) {
-            $this->utmSource = null;
-            $this->utmMedium = null;
-
-            return;
-        }
-
-        $defaults = $utmService->getServiceDefaults($this->utmService);
-        if ($defaults) {
-            $this->utmSource = $defaults['source'];
-            $this->utmMedium = $defaults['medium'];
         }
     }
 
@@ -163,7 +160,6 @@ class LinkEditor extends Component
     private function applyUtmParameters(string $url, UtmService $utmService): string
     {
         if ($this->utmService && ! empty($this->utmCampaign)) {
-            // Use popular service UTM generation
             return $utmService->generatePopularServiceUtm(
                 $url,
                 $this->utmService,
@@ -175,7 +171,6 @@ class LinkEditor extends Component
             );
         }
 
-        // Use manual UTM parameters
         $utmParams = array_filter([
             'utm_source' => $this->utmSource,
             'utm_medium' => $this->utmMedium,
@@ -185,14 +180,6 @@ class LinkEditor extends Component
         ]);
 
         return $utmService->generateUtmUrl($url, $utmParams);
-    }
-
-    /**
-     * Get supported services for the dropdown.
-     */
-    public function getSupportedServicesProperty(): array
-    {
-        return app(UtmService::class)->getSupportedServices();
     }
 
     /**

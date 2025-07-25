@@ -27,6 +27,7 @@ class LinkShortener extends Component
     #[Rule('nullable|unique:links,short_code|string|max:10|alpha_num')]
     public ?string $customCode = null;
 
+    // UTM parameters - synced from UTM component
     public bool $enableUtm = false;
 
     public ?string $utmService = null;
@@ -42,6 +43,22 @@ class LinkShortener extends Component
     public ?string $utmContent = null;
 
     public ?Link $createdLink = null;
+
+    protected $listeners = ['utmDataChanged'];
+
+    /**
+     * Handle UTM data changes from the UTM component.
+     */
+    public function utmDataChanged(array $utmData): void
+    {
+        $this->enableUtm = $utmData['enableUtm'];
+        $this->utmService = $utmData['utmService'];
+        $this->utmSource = $utmData['utmSource'];
+        $this->utmMedium = $utmData['utmMedium'];
+        $this->utmCampaign = $utmData['utmCampaign'];
+        $this->utmTerm = $utmData['utmTerm'];
+        $this->utmContent = $utmData['utmContent'];
+    }
 
     /**
      * Create a new short link.
@@ -65,6 +82,7 @@ class LinkShortener extends Component
                 'custom_code' => $this->customCode,
             ]);
 
+            $this->resetForm();
             session()->flash('message', 'Your link has been shortened!');
             redirect()->route('links.index');
         } catch (ValidationException $e) {
@@ -77,22 +95,14 @@ class LinkShortener extends Component
     }
 
     /**
-     * Update UTM fields when a popular service is selected.
+     * Reset form fields.
      */
-    public function updatedUtmService(UtmService $utmService): void
+    private function resetForm(): void
     {
-        if (empty($this->utmService)) {
-            $this->utmSource = null;
-            $this->utmMedium = null;
-
-            return;
-        }
-
-        $defaults = $utmService->getServiceDefaults($this->utmService);
-        if ($defaults) {
-            $this->utmSource = $defaults['source'];
-            $this->utmMedium = $defaults['medium'];
-        }
+        $this->reset([
+            'originalUrl', 'title', 'description', 'expiresAt', 'customCode',
+            'enableUtm', 'utmService', 'utmSource', 'utmMedium', 'utmCampaign', 'utmTerm', 'utmContent',
+        ]);
     }
 
     /**
