@@ -16,17 +16,7 @@
         </div>
     </div>
 
-    @if (session('message'))
-        <x-success-alert class="mb-6">
-            {{ session('message') }}
-        </x-success-alert>
-    @endif
-
-    @if (session('error'))
-        <x-error-alert class="mb-6">
-            {{ session('error') }}
-        </x-error-alert>
-    @endif
+    <x-status-messages/>
 
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

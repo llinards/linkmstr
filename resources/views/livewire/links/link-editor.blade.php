@@ -20,11 +20,7 @@
             </flux:button>
         </div>
 
-        @if (session('message'))
-            <x-success-alert class="mb-6">
-                {{ session('message') }}
-            </x-success-alert>
-        @endif
+        <x-status-messages/>
 
         <form wire:submit="updateLink" class="flex flex-col gap-6">
             <!-- URL to shorten -->
