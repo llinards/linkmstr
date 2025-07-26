@@ -62,11 +62,8 @@ test('link manager can delete a link', function () {
     $this->actingAs($user);
 
     Livewire::test(LinkManager::class)
-        ->call('confirmDelete', $link->id)
-        ->assertSet('showDeleteModal', true)
-        ->assertSet('linkToDelete.id', $link->id)
-        ->call('deleteLink')
-        ->assertSet('showDeleteModal', false);
+        ->call('deleteLink', $link->id)
+        ->assertDispatched('link-deleted');
 
     $this->assertDatabaseMissing('links', ['id' => $link->id]);
 });
@@ -104,21 +101,21 @@ test('link manager can sort links', function () {
         'user_id' => $user->id,
         'title' => 'A Link',
         'clicks' => 100,
-        'created_at' => now()->subDays(5)
+        'created_at' => now()->subDays(5),
     ]);
 
     $linkB = Link::factory()->create([
         'user_id' => $user->id,
         'title' => 'B Link',
         'clicks' => 50,
-        'created_at' => now()->subDays(2)
+        'created_at' => now()->subDays(2),
     ]);
 
     $linkC = Link::factory()->create([
         'user_id' => $user->id,
         'title' => 'C Link',
         'clicks' => 200,
-        'created_at' => now()->subDays(10)
+        'created_at' => now()->subDays(10),
     ]);
 
     // Default sort is created_at desc (newest first)

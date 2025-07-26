@@ -54,10 +54,10 @@ test('users can only view stats for their own links', function () {
 
 test('public redirect route is accessible to everyone', function () {
     $user = User::factory()->create();
-    $link = Link::factory()->active()->create([
+    $link = Link::factory()->create([
         'user_id' => $user->id,
         'original_url' => 'https://example.com',
-        'short_code' => 'public123'
+        'short_code' => 'public123',
     ]);
 
     // Guest can access the redirect route

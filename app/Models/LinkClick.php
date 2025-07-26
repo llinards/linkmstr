@@ -11,20 +11,6 @@ class LinkClick extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'link_id',
-        'ip_address',
-        'user_agent',
-        'referer',
-        'country',
-        'city',
-    ];
-
-    /**
      * Get the link that owns the click.
      */
     public function link(): BelongsTo

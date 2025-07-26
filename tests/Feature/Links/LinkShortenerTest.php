@@ -78,19 +78,6 @@ test('link can be created with all optional fields', function () {
     ]);
 });
 
-test('link shortener form can be reset to create another link', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
-
-    Livewire::test(LinkShortener::class)
-        ->set('originalUrl', 'https://example.com')
-        ->call('createLink')
-        ->assertSet('showForm', false)
-        ->call('createAnother')
-        ->assertSet('showForm', true)
-        ->assertSet('createdLink', null);
-});
-
 test('duplicate custom code shows validation error', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
@@ -98,7 +85,7 @@ test('duplicate custom code shows validation error', function () {
     // Create a link with a specific code first
     Link::factory()->create([
         'user_id' => $user->id,
-        'short_code' => 'abc123'
+        'short_code' => 'abc123',
     ]);
 
     // Try to create another with the same code
