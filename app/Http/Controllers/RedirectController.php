@@ -10,8 +10,6 @@ class RedirectController extends Controller
     /**
      * Handle the redirect for a short URL.
      *
-     * @param Request $request
-     * @param string $shortCode
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Request $request, string $shortCode)
@@ -20,8 +18,8 @@ class RedirectController extends Controller
             ->active()
             ->first();
 
-        if (!$link) {
-            return redirect()->route('home')->with('error', 'This link is invalid or has expired.');
+        if (! $link) {
+            return view('expired');
         }
 
         // Track the click
