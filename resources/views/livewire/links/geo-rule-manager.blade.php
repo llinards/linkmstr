@@ -27,108 +27,102 @@
                         No geo targeting rules defined. Add a rule below.
                     </p>
                 @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead>
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Priority
-                                </th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Countries
-                                </th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Continents
-                                </th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Target URL
-                                </th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach ($geoRules as $rule)
-                                <tr>
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{{ $rule->priority }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
+                    <!-- Mobile-friendly card layout -->
+                    <div class="space-y-4">
+                        @foreach ($geoRules as $rule)
+                            <div
+                                class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                                <!-- Header with priority and status -->
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                            Priority: {{ $rule->priority }}
+                                        </span>
+                                        @if ($rule->is_active)
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                Active
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                Inactive
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex space-x-2">
+                                        <flux:button wire:click="editGeoRule({{ $rule->id }})" size="xs"
+                                                     variant="ghost">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                                 fill="currentColor">
+                                                <path
+                                                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                            </svg>
+                                        </flux:button>
+                                        <flux:button wire:click="deleteGeoRule({{ $rule->id }})" size="xs"
+                                                     variant="danger" color="danger">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                                 fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                      clip-rule="evenodd"/>
+                                            </svg>
+                                        </flux:button>
+                                    </div>
+                                </div>
+
+                                <!-- Countries and Continents -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <span
+                                            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Countries</span>
                                         @if ($rule->country_codes)
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach (explode(',', $rule->country_codes) as $code)
                                                     <span
                                                         class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                            {{ $code }}
-                                                        </span>
+                                                        {{ $code }}
+                                                    </span>
                                                 @endforeach
                                             </div>
                                         @else
-                                            <span class="text-gray-500 dark:text-gray-400 italic">Any</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400 italic">Any</span>
                                         @endif
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
+                                    </div>
+
+                                    <div>
+                                        <span
+                                            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Continents</span>
                                         @if ($rule->continent_codes)
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach (explode(',', $rule->continent_codes) as $code)
                                                     <span
                                                         class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                            {{ $code }}
-                                                        </span>
+                                                        {{ $code }}
+                                                    </span>
                                                 @endforeach
                                             </div>
                                         @else
-                                            <span class="text-gray-500 dark:text-gray-400 italic">Any</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400 italic">Any</span>
                                         @endif
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
-                                        <div class="max-w-xs truncate" title="{{ $rule->target_url }}">
+                                    </div>
+                                </div>
+
+                                <!-- Target URL -->
+                                <div>
+                                    <span
+                                        class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Target URL</span>
+                                    <div class="text-sm text-gray-900 dark:text-gray-200 break-all">
+                                        <a href="{{ $rule->target_url }}" target="_blank" rel="noopener noreferrer"
+                                           class="text-blue-600 dark:text-blue-400 hover:underline">
                                             {{ $rule->target_url }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        @if ($rule->is_active)
-                                            <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                    Active
-                                                </span>
-                                        @else
-                                            <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                    Inactive
-                                                </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <div class="flex space-x-2">
-                                            <flux:button wire:click="editGeoRule({{ $rule->id }})" size="xs"
-                                                         variant="ghost">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                     viewBox="0 0 20 20"
-                                                     fill="currentColor">
-                                                    <path
-                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                                                </svg>
-                                            </flux:button>
-                                            <flux:button wire:click="deleteGeoRule({{ $rule->id }})" size="xs"
-                                                         variant="danger"
-                                                         color="danger">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                     viewBox="0 0 20 20"
-                                                     fill="currentColor">
-                                                    <path fill-rule="evenodd"
-                                                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                          clip-rule="evenodd"/>
-                                                </svg>
-                                            </flux:button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>
