@@ -15,7 +15,7 @@ class RedirectController extends Controller
             ->first();
 
         if (! $link) {
-            abort(404, 'Link not found or expired');
+            return view('expired');
         }
 
         // Get the target URL based on geo-targeting
