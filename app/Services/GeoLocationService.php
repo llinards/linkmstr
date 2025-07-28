@@ -35,7 +35,7 @@ class GeoLocationService
         try {
             // Using ip-api.com (free tier: 1000 requests/minute with no API key)
             // For production, consider paid services like MaxMind, IPGeolocation, etc.
-            $response = Http::timeout(5)->get("https://ip-api.com/json/{$ip}", [
+            $response = Http::timeout(5)->get("http://ip-api.com/json/{$ip}", [
                 'fields' => 'status,country,countryCode,continent,continentCode,city,region,timezone',
             ]);
 
