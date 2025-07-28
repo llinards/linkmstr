@@ -30,6 +30,10 @@ Route::middleware(['auth'])->group(function () {
         return view('links.create');
     })->name('links.create');
 
+    Route::get('links/geo-targeting-guide', function () {
+        return view('links.geo-targeting-guide');
+    })->name('links.geo-targeting-guide');
+
     Route::get('links/{link}/edit', function (\App\Models\Link $link) {
         if (auth()->id() !== $link->user_id) {
             abort(403, 'Unauthorized action.');

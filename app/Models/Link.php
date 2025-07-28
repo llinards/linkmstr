@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeoLocationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,6 +37,22 @@ class Link extends Model
     public function clicks(): HasMany
     {
         return $this->hasMany(LinkClick::class);
+    }
+
+    /**
+     * Get the geo rules for the link.
+     */
+    public function geoRules(): HasMany
+    {
+        return $this->hasMany(GeoRule::class)->orderBy('priority', 'desc');
+    }
+
+    /**
+     * Get the active geo rules for the link.
+     */
+    public function activeGeoRules(): HasMany
+    {
+        return $this->hasMany(GeoRule::class)->where('is_active', true)->orderBy('priority', 'desc');
     }
 
     /**
@@ -75,11 +92,18 @@ class Link extends Model
     {
         $this->increment('clicks');
 
+        $geoService = app(GeoLocationService::class);
+        $location = $geoService->getLocationFromIp(request()->ip());
+
         $this->clicks()->create([
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'referer' => request()->header('referer'),
-            // Country and city would require IP geolocation service
+            'country' => $location['country'],
+            'country_code' => $location['country_code'],
+            'city' => $location['city'],
+            'continent' => $location['continent'],
+            'continent_code' => $location['continent_code'],
         ]);
     }
 

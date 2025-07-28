@@ -3,28 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Link;
+use App\Services\GeoTargetingService;
 use Illuminate\Http\Request;
 
 class RedirectController extends Controller
 {
-    /**
-     * Handle the redirect for a short URL.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function __invoke(Request $request, string $shortCode)
+    public function __invoke(Request $request, string $shortCode, GeoTargetingService $geoTargetingService)
     {
         $link = Link::where('short_code', $shortCode)
             ->active()
             ->first();
 
         if (! $link) {
-            return view('expired');
+            abort(404, 'Link not found or expired');
         }
 
-        // Track the click
-        $link->trackClick();
+        // Get the target URL based on geo-targeting
+        $targetUrl = $geoTargetingService->getTargetUrl($link, $request->ip());
 
-        return redirect($link->original_url);
+        // Get location data for tracking
+        $locationData = $geoTargetingService->getLocationData($request->ip());
+
+        // Track the click with geo information
+        $link->trackClick($locationData);
+
+        return redirect($targetUrl);
     }
 }

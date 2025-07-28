@@ -112,5 +112,8 @@
                 </flux:button>
             </div>
         </form>
+
+        <!-- Geo Targeting Rules Manager -->
+        <livewire:links.geo-rule-manager :link="$link" />
     </div>
 </div>
