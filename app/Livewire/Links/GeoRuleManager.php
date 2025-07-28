@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Links;
 
-use App\Models\Link;
 use App\Models\GeoRule;
+use App\Models\Link;
 use App\Services\GeoLocationService;
 use App\Services\GeoTargetingService;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +16,9 @@ class GeoRuleManager extends Component
     public Link $link;
 
     public ?int $editingRuleId = null;
+
+    #[Rule('boolean')]
+    public bool $enableGeoRules = false;
 
     #[Rule('nullable|string')]
     public ?string $countryCodesInput = null;
@@ -33,8 +36,11 @@ class GeoRuleManager extends Component
     public bool $isActive = true;
 
     public array $countries = [];
+
     public array $continents = [];
+
     public array $selectedCountries = [];
+
     public array $selectedContinents = [];
 
     public function mount(Link $link, GeoLocationService $geoLocationService)
@@ -42,6 +48,9 @@ class GeoRuleManager extends Component
         $this->link = $link;
         $this->countries = $geoLocationService->getCountries();
         $this->continents = $geoLocationService->getContinents();
+
+        // Auto-enable if there are existing geo rules
+        $this->enableGeoRules = $this->link->geoRules()->exists();
     }
 
     public function createGeoRule(GeoTargetingService $geoTargetingService)
@@ -109,6 +118,7 @@ class GeoRuleManager extends Component
         // Authorization check
         if ($geoRule->link_id !== $this->link->id) {
             session()->flash('error', 'Unauthorized access.');
+
             return;
         }
 
@@ -151,10 +161,10 @@ class GeoRuleManager extends Component
     private function prepareInputs()
     {
         // Convert selected countries array to comma-separated string
-        $this->countryCodesInput = !empty($this->selectedCountries) ? implode(',', $this->selectedCountries) : null;
+        $this->countryCodesInput = ! empty($this->selectedCountries) ? implode(',', $this->selectedCountries) : null;
 
         // Convert selected continents array to comma-separated string
-        $this->continentCodesInput = !empty($this->selectedContinents) ? implode(',', $this->selectedContinents) : null;
+        $this->continentCodesInput = ! empty($this->selectedContinents) ? implode(',', $this->selectedContinents) : null;
     }
 
     private function resetInputs()
